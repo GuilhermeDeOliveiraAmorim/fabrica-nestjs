@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Message } from './Message';
+import { MessageDto } from './MessageDto';
 
 @Injectable()
 export class MessagesService {
@@ -14,7 +15,13 @@ export class MessagesService {
     },
   ];
 
-  findById(id: number) {
+  async findById(id: number) {
+    const message = this.messages.find((msg) => msg.id === id);
+
+    if (!message) {
+      throw new Error(`Message ${id} not found`);
+    }
+
     return this.messages.find((message) => message.id === id);
   }
 
@@ -22,13 +29,30 @@ export class MessagesService {
     return this.messages;
   }
 
-  create(message: Message) {
+  create(messageDto: MessageDto) {
+    const id = this.messages.length + 1;
+
+    const message: Message = {
+      id,
+      ...messageDto,
+    };
+
     this.messages.push(message);
     return message;
   }
 
-  update(id: number, message: Message) {
+  async update(id: number, messageDto: MessageDto) {
     const index = this.messages.findIndex((message) => message.id === id);
+
+    if (index < 0) {
+      throw new Error(`Message ${id} not found`);
+    }
+
+    const message: Message = {
+      id,
+      ...messageDto,
+    };
+
     this.messages[index] = message;
     return message;
   }
